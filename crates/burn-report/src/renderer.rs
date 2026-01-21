@@ -151,13 +151,16 @@ impl MetricsRendererTraining for TensorboardRenderer {
 
 impl MetricsRendererEvaluation for TensorboardRenderer {
     fn update_test(&mut self, _name: EvaluationName, _state: MetricState) {
-        // Store test metrics - for now we'll just log them on render
+        // Note: Test metrics are currently not logged to TensorBoard.
+        // This is a known limitation - only training and validation metrics are logged.
+        // To be implemented in future versions.
     }
 
     fn render_test(&mut self, _item: EvaluationProgress) {
         let mut writer = self.writer.lock();
 
         // For test rendering, we just flush the writer
+        // Note: Test metrics are not currently logged (limitation)
         if let Err(e) = writer.flush() {
             eprintln!("Failed to flush writer during test: {}", e);
         }

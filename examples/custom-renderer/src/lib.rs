@@ -55,8 +55,8 @@ pub fn run<B: AutodiffBackend>(device: B::Device) {
     // Create TensorBoard renderer
     // Logs will be written to ./runs/{timestamp}/
     // You can view them with: tensorboard --logdir runs
-    let renderer = TensorboardRenderer::with_default_logdir()
-        .expect("Failed to create TensorBoard renderer");
+    let renderer =
+        TensorboardRenderer::with_default_logdir().expect("Failed to create TensorBoard renderer");
 
     println!("Training with TensorBoard logging enabled.");
     println!("To view the logs, run: tensorboard --logdir runs");

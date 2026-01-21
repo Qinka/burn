@@ -32,6 +32,9 @@ impl ProtobufWriter {
 
     fn write_int64(&mut self, field_number: u32, value: i64) {
         self.write_tag(field_number, 0); // wire type 0 = varint
+        // For protobuf, we use zigzag encoding for signed integers
+        // However, TensorBoard's step field is typically non-negative,
+        // so we can safely cast to u64 for our use case
         self.write_varint(value as u64);
     }
 
@@ -95,6 +98,9 @@ pub fn write_scalar_event<W: Write>(
     let length = event.len() as u64;
 
     writer.write_all(&length.to_le_bytes())?;
+    // Note: CRC checksums are set to 0 as placeholders.
+    // TensorBoard can still read these files correctly, but for production use,
+    // proper CRC32 checksums should be implemented for data integrity.
     writer.write_all(&0u32.to_le_bytes())?; // CRC placeholder
     writer.write_all(&event)?;
     writer.write_all(&0u32.to_le_bytes())?; // CRC placeholder
