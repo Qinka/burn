@@ -50,5 +50,8 @@ mod event;
 mod renderer;
 mod writer;
 
+#[cfg(test)]
+mod tests;
+
 pub use renderer::{TensorboardRenderer, TensorboardRendererConfig};
 pub use writer::{EventWriter, WriterError};

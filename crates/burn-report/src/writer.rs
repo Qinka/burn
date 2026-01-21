@@ -12,7 +12,7 @@ use crate::event::write_scalar_event;
 pub enum WriterError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
-    
+
     #[error("Failed to get system time")]
     SystemTime,
 }
@@ -27,35 +27,35 @@ impl EventWriter {
     pub fn new(logdir: PathBuf) -> Result<Self, WriterError> {
         // Create the log directory if it doesn't exist
         fs::create_dir_all(&logdir)?;
-        
+
         // Create event file with timestamp
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|_| WriterError::SystemTime)?
             .as_secs();
-        
+
         let filename = format!("events.out.tfevents.{}.{}", timestamp, std::process::id());
         let filepath = logdir.join(filename);
-        
+
         let file = File::create(filepath)?;
         let writer = BufWriter::new(file);
-        
+
         Ok(Self { writer })
     }
-    
+
     /// Write a scalar summary
     pub fn add_scalar(&mut self, tag: &str, value: f32, step: i64) -> Result<(), WriterError> {
         let wall_time = self.get_wall_time()?;
         write_scalar_event(&mut self.writer, wall_time, step, tag, value)?;
         Ok(())
     }
-    
+
     /// Flush the writer
     pub fn flush(&mut self) -> Result<(), WriterError> {
         self.writer.flush()?;
         Ok(())
     }
-    
+
     /// Get the current wall time in seconds since epoch
     fn get_wall_time(&self) -> Result<f64, WriterError> {
         SystemTime::now()

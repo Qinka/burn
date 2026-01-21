@@ -7,8 +7,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use burn_train::metric::{MetricDefinition, MetricId};
 use burn_train::renderer::{
-    EvaluationName, EvaluationProgress, MetricState, MetricsRenderer,
-    MetricsRendererEvaluation, MetricsRendererTraining, TrainingProgress,
+    EvaluationName, EvaluationProgress, MetricState, MetricsRenderer, MetricsRendererEvaluation,
+    MetricsRendererTraining, TrainingProgress,
 };
 use parking_lot::Mutex;
 
@@ -26,14 +26,14 @@ impl TensorboardRendererConfig {
     pub fn new(logdir: PathBuf) -> Self {
         Self { logdir }
     }
-    
+
     /// Create a new configuration with default log directory (./runs/{timestamp})
     pub fn default_logdir() -> Self {
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map(|d| d.as_secs())
             .unwrap_or(0);
-        
+
         let logdir = PathBuf::from(format!("./runs/{}", timestamp));
         Self { logdir }
     }
@@ -57,7 +57,7 @@ impl TensorboardRenderer {
     /// Create a new TensorBoard renderer with the given configuration
     pub fn new(config: TensorboardRendererConfig) -> Result<Self, WriterError> {
         let writer = EventWriter::new(config.logdir)?;
-        
+
         Ok(Self {
             writer: Arc::new(Mutex::new(writer)),
             metric_definitions: HashMap::new(),
@@ -65,17 +65,17 @@ impl TensorboardRenderer {
             valid_metrics: HashMap::new(),
         })
     }
-    
+
     /// Create a new TensorBoard renderer with a custom log directory
     pub fn with_logdir(logdir: PathBuf) -> Result<Self, WriterError> {
         Self::new(TensorboardRendererConfig::new(logdir))
     }
-    
+
     /// Create a new TensorBoard renderer with default log directory
     pub fn with_default_logdir() -> Result<Self, WriterError> {
         Self::new(TensorboardRendererConfig::default())
     }
-    
+
     /// Extract scalar value from MetricState
     fn extract_scalar(&self, state: &MetricState) -> Option<(MetricId, f32)> {
         match state {
@@ -87,7 +87,7 @@ impl TensorboardRenderer {
             MetricState::Generic(_) => None,
         }
     }
-    
+
     /// Get the metric name from its ID
     fn get_metric_name(&self, metric_id: &MetricId) -> String {
         self.metric_definitions
@@ -103,17 +103,17 @@ impl MetricsRendererTraining for TensorboardRenderer {
             self.train_metrics.insert(metric_id, value);
         }
     }
-    
+
     fn update_valid(&mut self, state: MetricState) {
         if let Some((metric_id, value)) = self.extract_scalar(&state) {
             self.valid_metrics.insert(metric_id, value);
         }
     }
-    
+
     fn render_train(&mut self, item: TrainingProgress) {
         let step = item.iteration as i64;
         let mut writer = self.writer.lock();
-        
+
         for (metric_id, value) in &self.train_metrics {
             let name = self.get_metric_name(metric_id);
             let tag = format!("train/{}", name);
@@ -121,18 +121,18 @@ impl MetricsRendererTraining for TensorboardRenderer {
                 eprintln!("Failed to write train metric {}: {}", name, e);
             }
         }
-        
+
         if let Err(e) = writer.flush() {
             eprintln!("Failed to flush writer: {}", e);
         }
-        
+
         self.train_metrics.clear();
     }
-    
+
     fn render_valid(&mut self, item: TrainingProgress) {
         let step = item.iteration as i64;
         let mut writer = self.writer.lock();
-        
+
         for (metric_id, value) in &self.valid_metrics {
             let name = self.get_metric_name(metric_id);
             let tag = format!("valid/{}", name);
@@ -140,11 +140,11 @@ impl MetricsRendererTraining for TensorboardRenderer {
                 eprintln!("Failed to write valid metric {}: {}", name, e);
             }
         }
-        
+
         if let Err(e) = writer.flush() {
             eprintln!("Failed to flush writer: {}", e);
         }
-        
+
         self.valid_metrics.clear();
     }
 }
@@ -153,10 +153,10 @@ impl MetricsRendererEvaluation for TensorboardRenderer {
     fn update_test(&mut self, _name: EvaluationName, _state: MetricState) {
         // Store test metrics - for now we'll just log them on render
     }
-    
+
     fn render_test(&mut self, _item: EvaluationProgress) {
         let mut writer = self.writer.lock();
-        
+
         // For test rendering, we just flush the writer
         if let Err(e) = writer.flush() {
             eprintln!("Failed to flush writer during test: {}", e);
@@ -171,7 +171,7 @@ impl MetricsRenderer for TensorboardRenderer {
             eprintln!("Failed to flush writer on close: {}", e);
         }
     }
-    
+
     fn register_metric(&mut self, definition: MetricDefinition) {
         self.metric_definitions
             .insert(definition.metric_id.clone(), definition);
