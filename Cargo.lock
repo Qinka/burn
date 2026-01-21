@@ -1095,6 +1095,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "burn-report"
+version = "0.21.0"
+dependencies = [
+ "burn-core",
+ "burn-train",
+ "parking_lot",
+ "tempfile",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "burn-rocm"
 version = "0.21.0"
 dependencies = [
@@ -2532,6 +2543,7 @@ name = "custom-renderer"
 version = "0.21.0"
 dependencies = [
  "burn",
+ "burn-report",
  "bytemuck",
  "derive-new",
  "guide",

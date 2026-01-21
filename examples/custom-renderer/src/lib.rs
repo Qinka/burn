@@ -3,14 +3,9 @@ use burn::{
     data::{dataloader::DataLoaderBuilder, dataset::vision::MnistDataset},
     optim::AdamConfig,
     tensor::backend::AutodiffBackend,
-    train::{
-        Learner, SupervisedTraining,
-        renderer::{
-            EvaluationName, EvaluationProgress, MetricState, MetricsRenderer,
-            MetricsRendererEvaluation, MetricsRendererTraining, TrainingProgress,
-        },
-    },
+    train::{Learner, SupervisedTraining},
 };
+use burn_report::TensorboardRenderer;
 use guide::{data::MnistBatcher, model::ModelConfig};
 
 #[derive(Config, Debug)]
@@ -27,38 +22,6 @@ pub struct MnistTrainingConfig {
     pub lr: f64,
     pub model: ModelConfig,
     pub optimizer: AdamConfig,
-}
-
-struct CustomRenderer {}
-
-impl MetricsRendererTraining for CustomRenderer {
-    fn update_train(&mut self, _state: MetricState) {}
-
-    fn update_valid(&mut self, _state: MetricState) {}
-
-    fn render_train(&mut self, item: TrainingProgress) {
-        dbg!(item);
-    }
-
-    fn render_valid(&mut self, item: TrainingProgress) {
-        dbg!(item);
-    }
-}
-
-impl MetricsRenderer for CustomRenderer {
-    fn manual_close(&mut self) {
-        // Nothing to do.
-    }
-
-    fn register_metric(&mut self, _definition: burn::train::metric::MetricDefinition) {}
-}
-
-impl MetricsRendererEvaluation for CustomRenderer {
-    fn update_test(&mut self, _name: EvaluationName, _state: MetricState) {}
-
-    fn render_test(&mut self, item: EvaluationProgress) {
-        dbg!(item);
-    }
 }
 
 pub fn run<B: AutodiffBackend>(device: B::Device) {
@@ -89,10 +52,20 @@ pub fn run<B: AutodiffBackend>(device: B::Device) {
         .num_workers(config.num_workers)
         .build(MnistDataset::test());
 
+    // Create TensorBoard renderer
+    // Logs will be written to ./runs/{timestamp}/
+    // You can view them with: tensorboard --logdir runs
+    let renderer = TensorboardRenderer::with_default_logdir()
+        .expect("Failed to create TensorBoard renderer");
+
+    println!("Training with TensorBoard logging enabled.");
+    println!("To view the logs, run: tensorboard --logdir runs");
+    println!("Then open http://localhost:6006 in your browser.");
+
     // artifact dir does not need to be provided when log_to_file is false
     let training = SupervisedTraining::new("", dataloader_train, dataloader_test)
         .num_epochs(config.num_epochs)
-        .renderer(CustomRenderer {})
+        .renderer(renderer)
         .with_application_logger(None);
     // can be used to interrupt training
     let _interrupter = training.interrupter();
