@@ -45,7 +45,7 @@ impl TensorboardRendererConfig {
 
 impl Default for TensorboardRendererConfig {
     fn default() -> Self {
-        Self::default_logdir()
+        Self::with_default_logdir()
     }
 }
 
@@ -68,16 +68,6 @@ impl TensorboardRenderer {
             train_metrics: HashMap::new(),
             valid_metrics: HashMap::new(),
         })
-    }
-
-    /// Create a new TensorBoard renderer with a custom log directory
-    pub fn with_logdir(logdir: PathBuf) -> Result<Self, WriterError> {
-        Self::new(TensorboardRendererConfig::new(logdir))
-    }
-
-    /// Create a new TensorBoard renderer with default log directory
-    pub fn with_default_logdir() -> Result<Self, WriterError> {
-        Self::new(TensorboardRendererConfig::default())
     }
 
     /// Extract scalar value from MetricState
