@@ -24,7 +24,7 @@ pub struct TensorboardRendererConfig {
 impl TensorboardRendererConfig {
     /// Create a new configuration with a custom log directory
     pub fn with_path<T:Into<PathBuf>>(logdir: T) -> Self {
-        Self { logdir.into() }
+        Self { logdir: logdir.into() }
     }
 
     /// Create a new configuration with default log directory (./runs/{timestamp})
