@@ -3,7 +3,7 @@ authors = ["nathanielsimard <nathaniel.simard.42@gmail.com>", "Ankitects Pty Ltd
 edition.workspace = true
 license.workspace = true
 name = "custom-renderer"
-description = "Example of how to render training progress outside of the tui"
+description = "Example of how to render training progress with TensorBoard"
 publish = false
 version.workspace = true
 
@@ -12,6 +12,7 @@ workspace = true
 
 [dependencies]
 burn = {path = "../../crates/burn", features=["autodiff", "wgpu", "train", "dataset", "vision"], default-features=false}
+burn-report = {path = "../../crates/burn-report", default-features=false}
 guide = {path = "../guide", default-features=false}
 
 # Serialization
