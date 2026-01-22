@@ -38,7 +38,7 @@ impl TensorboardRendererConfig {
         Self { logdir }
     }
 
-    pub fn init(self) -> Result<TensorboardRenderer, WriteError> {
+    pub fn init(self) -> Result<TensorboardRenderer, WriterError> {
         TensorboardRenderer::new(self)
     }
 }
