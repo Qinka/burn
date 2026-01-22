@@ -23,12 +23,12 @@ pub struct TensorboardRendererConfig {
 
 impl TensorboardRendererConfig {
     /// Create a new configuration with a custom log directory
-    pub fn new(logdir: PathBuf) -> Self {
-        Self { logdir }
+    pub fn with_path<T:Into<PathBuf>>(logdir: T) -> Self {
+        Self { logdir.into() }
     }
 
     /// Create a new configuration with default log directory (./runs/{timestamp})
-    pub fn default_logdir() -> Self {
+    pub fn with_default_logdir() -> Self {
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map(|d| d.as_secs())
@@ -36,6 +36,10 @@ impl TensorboardRendererConfig {
 
         let logdir = PathBuf::from(format!("./runs/{}", timestamp));
         Self { logdir }
+    }
+
+    pub fn init(self) -> Result<TensorboardRenderer, WriteError> {
+        TensorboardRenderer::new(self)
     }
 }
 
